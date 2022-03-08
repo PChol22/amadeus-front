@@ -6,7 +6,7 @@
 
 ## Build :
 
-- `yarn build``
+- `yarn build`
 
 ## Deploy to GCP :
 
