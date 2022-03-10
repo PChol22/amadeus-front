@@ -99,7 +99,7 @@ class ExampleComponent extends React.Component<any, State> {
       name: company,
       x: this.state.data?.companies[company].x || [],
       y: this.state.data?.companies[company].y || [],
-      mode: 'lines',
+      mode: (this.state.data?.companies[company].x || []).length > 1 ? 'lines' : 'scatter',
       line: {
         color: graphColors[i],
         width: 2,
