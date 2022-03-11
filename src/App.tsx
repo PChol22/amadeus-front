@@ -229,6 +229,10 @@ class ExampleComponent extends React.Component<any, State> {
             <label>DESTINATION (*): </label><br/>
             <TextField variant="outlined" onChange={this.handleChangeDest} className="text"/>
           </div>
+          <div className='form-field'>
+            <label>SEARCH COUNTRY : </label><br/>
+            { UnstyledSelectRichOptions(this) }
+          </div>
           <div className="layout">
             <div className='form-field'>
               <label>IS TRIP ROUND ? </label>
@@ -248,10 +252,6 @@ class ExampleComponent extends React.Component<any, State> {
                 marks={[{value: 0, label: '0'}, {value: 31, label: '31'}]}
               />
             </div>
-          </div>
-          <div className='form-field'>
-            <label>SEARCH COUNTRY : </label><br/>
-            { UnstyledSelectRichOptions(this) }
           </div>
           <div className='form-field'>
             <label>NB CONNECTIONS : </label>
@@ -282,7 +282,6 @@ class ExampleComponent extends React.Component<any, State> {
           </div>
           <div className='form-field'>
             <Button variant="outlined" onClick={this.callApi} disabled={!this.state.formData.departure || !this.state.formData.destination}>FETCH DATA</Button>
-            <Button variant="outlined" onClick={() => console.log(this.state.formData)}>STATE</Button>
           </div>
         </div>
         { (this.state.isLoading || this.state.data) && <div className="dataContainer">

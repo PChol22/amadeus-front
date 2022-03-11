@@ -37,11 +37,11 @@ const StyledButton = styled('button')(
   min-width: 320px;
   background: ${theme.palette.mode === 'dark' ? grey[900] : '#fff'};
   border: 1px solid ${theme.palette.mode === 'dark' ? grey[800] : grey[300]};
-  border-radius: 0.75em;
-  margin: 0.5em;
+  border-radius: 0.3em;
   padding: 10px;
   text-align: left;
   line-height: 1.5;
+  width: 100%;
   color: ${theme.palette.mode === 'dark' ? grey[300] : grey[900]};
 
   &:hover {
