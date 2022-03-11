@@ -1,8 +1,59 @@
 .loading {
-    width: 3em;
-    height: 3em;
+    width: 30%;
 }
 
 .form-field {
-    margin: 1em;;
+    margin-top: .7em;
+}
+
+.form {
+    margin: 2em;
+    border: 1px solid #ccc;
+    border-radius: 1em;
+    width: 30%;
+    padding: 1em 2.5em;
+}
+
+.text {
+    width: 100%;
+}
+
+.layout {
+    border: 1px solid #ccc;
+    border-radius: 1em;
+    padding: .1em 1.2em;
+}
+
+.container {
+    display: flex;
+}
+
+.dataContainer {
+    margin: 2em;
+    border: 1px solid #ccc;
+    border-radius: 1em;
+    width: 60%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.titleContainer {
+    margin: 2em;
+    width: 60%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    color: #666;
+    font-size: 1.5rem;
+    position: relative;
+}
+
+.plane {
+    width: 100%;
+}
+
+.data {
+    width: 100%;
 }

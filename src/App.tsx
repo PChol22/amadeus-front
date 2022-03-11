@@ -1,6 +1,7 @@
 import React from 'react';
 import './App.css';
 import Plot from 'react-plotly.js';
+import { Slider, Checkbox, TextField, Button } from '@mui/material';
 
 interface ApiResponse {
   ond: string,
@@ -14,8 +15,16 @@ interface ApiResponse {
 
 interface State {
   isLoading: boolean,
-  departure: string,
-  destination: string,
+  formData: {
+    departure: string,
+    destination: string,
+    nbConnections: number[]
+    searchCountry?: string,
+    searchId?: string,
+    stayDuration: number[],
+    searchDate: number[],
+    isTripRound: boolean,
+  },
   data: ApiResponse | undefined,
 };
 
@@ -43,15 +52,30 @@ const graphColors = [
 class ExampleComponent extends React.Component<any, State> {
   constructor(props: any) {
     super(props);
+    const today = new Date();
+    const beforeDate = new Date();
+    beforeDate.setDate(today.getDate() - 365);
     this.state = {
       isLoading: false,
-      departure: '',
-      destination: '',
+      formData: {
+        departure: '',
+        destination: '',
+        nbConnections: [1,4],
+        stayDuration: [0, 31],
+        isTripRound: false,
+        searchDate: [-365, 0],
+      },
       data: undefined,
     };
     this.callApi = this.callApi.bind(this);
     this.handleChangeDep = this.handleChangeDep.bind(this);
     this.handleChangeDest = this.handleChangeDest.bind(this);
+    this.handleChangeCountry = this.handleChangeCountry.bind(this);
+    this.handleChangeNbConnections = this.handleChangeNbConnections.bind(this);
+    this.handleChangeStayDuration = this.handleChangeStayDuration.bind(this);
+    this.handleChangeIsTripRound = this.handleChangeIsTripRound.bind(this);
+    this.handleChangeSearchDate = this.handleChangeSearchDate.bind(this);
+    this.handleKey = this.handleKey.bind(this);
   }
 
   public callApi(): void {
@@ -66,7 +90,9 @@ class ExampleComponent extends React.Component<any, State> {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ ond: `${this.state.departure}${this.state.destination}`})
+      body: JSON.stringify({
+        ond: `${this.state.formData.departure}${this.state.formData.destination}`,
+      })
     }
     fetch(queryString, init)
     .then(res => res.json())
@@ -82,15 +108,71 @@ class ExampleComponent extends React.Component<any, State> {
   public handleChangeDep(event: { target: { value: string }}) {
     this.setState({
       ...this.state,
-      departure: event.target.value,
+      formData: {
+        ...this.state.formData,
+        departure: event.target.value,
+      }
     })
   }
 
   public handleChangeDest(event: { target: { value: string }}) {
     this.setState({
       ...this.state,
-      destination: event.target.value,
+      formData: {
+        ...this.state.formData,
+        destination: event.target.value,
+      }
     })
+  }
+
+  public handleChangeCountry(event: { target: { value: string }}) {
+
+  }
+
+  public handleChangeNbConnections(_: any, data: any) {
+    this.setState({
+      ...this.state,
+      formData: {
+        ...this.state.formData,
+        nbConnections: [data[0], data[1]],
+      }
+    });
+  }
+
+  public handleChangeIsTripRound(event: { target: { checked: boolean }}) {
+    this.setState({
+      ...this.state,
+      formData: {
+        ...this.state.formData,
+        isTripRound: event.target.checked,
+      }
+    });
+  }
+
+  public handleChangeStayDuration(_: any, data: any) {
+    this.setState({
+      ...this.state,
+      formData: {
+        ...this.state.formData,
+        stayDuration: [data[0], data[1]],
+      }
+    });
+  }
+
+  public handleChangeSearchDate(_: any, data: any) {
+    this.setState({
+      ...this.state,
+      formData: {
+        ...this.state.formData,
+        searchDate: [data[0], data[1]],
+      }
+    });
+  }
+
+  public handleKey(e: any) {
+    if (e.code === 'Enter' && this.state.formData.departure && this.state.formData.destination) {
+      this.callApi(); 
+    } 
   }
 
   public computeGraphData(): GraphData[] {
@@ -107,7 +189,13 @@ class ExampleComponent extends React.Component<any, State> {
       }
     }));
     return data;
-    
+  }
+
+  public intToDate(i: number) {
+    const last = new Date();
+    const current = new Date();
+    current.setDate(last.getDate() + i);
+    return current.toISOString().slice(0,10);
   }
 
   public render(): JSX.Element {
@@ -119,13 +207,78 @@ class ExampleComponent extends React.Component<any, State> {
     };
     
     return (
-      <div>
-        <h1>Amadeux x ASI - Flight prices tracker</h1>
-        <div className='form-field'><label>DEPART : </label><br/><input type="text" onChange={this.handleChangeDep}></input></div>
-        <div className='form-field'><label>DESTINATION : </label><br/><input type="text" onChange={this.handleChangeDest}></input></div>
-        <div className='form-field'><button onClick={this.callApi} disabled={!this.state.departure || !this.state.destination}>GET DATA</button></div>
-        { this.state.isLoading && <img className="loading" alt="loading" src={require("./spinner.gif")}/> }
-        { this.state.data && <Plot data={ data } layout={ layout } />}
+      <div className="container">
+        <div className="form" onKeyPress={this.handleKey} >
+          <div className='form-field'>
+            <label>DEPARTURE (*): </label><br/>
+            <TextField variant="outlined" onChange={this.handleChangeDep} className="text"/>
+          </div>
+          <div className='form-field'>
+            <label>DESTINATION (*): </label><br/>
+            <TextField variant="outlined" onChange={this.handleChangeDest} className="text"/>
+          </div>
+          <div className='form-field'>
+            <label>SEARCH COUNTRY : </label><br/>
+            <TextField variant="outlined" onChange={this.handleChangeCountry} className="text"/>
+          </div>
+          <div className='form-field'>
+            <label>NB CONNECTIONS : </label>
+            <Slider
+              getAriaLabel={() => 'Nb Connections'}
+              onChange={this.handleChangeNbConnections}
+              value={[this.state.formData.nbConnections[0], this.state.formData.nbConnections[1]]}
+              valueLabelDisplay="auto"
+              step={1}
+              min={1}
+              max={4}
+              marks={[{value: 1, label: '1'}, {value: 4, label: '4'}]}
+            />
+          </div>
+          <div className='form-field'>
+            <label>SEARCH DATE : </label>
+            <Slider
+              getAriaLabel={() => 'Search date'}
+              onChange={this.handleChangeSearchDate}
+              value={[this.state.formData.searchDate[0], this.state.formData.searchDate[1]]}
+              valueLabelDisplay="auto"
+              step={1}
+              min={-365}
+              max={0}
+              valueLabelFormat={this.intToDate}
+              marks={[{value: -365, label: this.intToDate(-365)}, {value: 0, label: this.intToDate(0)}]}
+            />
+          </div>
+          <div className="layout">
+          <div className='form-field'>
+            <label>IS TRIP ROUND ? </label>
+            <Checkbox onChange={this.handleChangeIsTripRound}/>
+          </div>
+          <div className='form-field'>
+            <label>STAY DURATION : </label>
+            <Slider
+              getAriaLabel={() => 'Stay Duration'}
+              onChange={this.handleChangeStayDuration}
+              value={[this.state.formData.stayDuration[0], this.state.formData.stayDuration[1]]}
+              valueLabelDisplay="auto"
+              step={1}
+              min={0}
+              max={31}
+              disabled={!this.state.formData.isTripRound}
+              marks={[{value: 0, label: '0'}, {value: 31, label: '31'}]}
+            />
+          </div>
+          </div>
+          <div className='form-field'>
+            <Button variant="outlined" onClick={this.callApi} disabled={!this.state.formData.departure || !this.state.formData.destination}>FETCH DATA</Button>
+          </div>
+        </div>
+        { (this.state.isLoading || this.state.data) && <div className="dataContainer">
+          { this.state.isLoading && <img className="loading" alt="loading" src={require("./spinner.gif")}/> }
+          { this.state.data && <Plot data={ data } layout={ layout } className="data"/>}
+        </div> }
+        { !(this.state.isLoading || this.state.data) && <div className="titleContainer">
+          <img className="plane" alt="loading" src={require("./title.png")}/>
+        </div> }
       </div>
     );
   }
