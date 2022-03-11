@@ -1,7 +1,8 @@
 import React from 'react';
 import './App.css';
 import Plot from 'react-plotly.js';
-import { Slider, Checkbox, TextField, Button } from '@mui/material';
+import { Slider, Checkbox, TextField, Button  } from '@mui/material';
+import UnstyledSelectRichOptions from './countries';
 
 interface ApiResponse {
   ond: string,
@@ -54,16 +55,16 @@ class ExampleComponent extends React.Component<any, State> {
     super(props);
     const today = new Date();
     const beforeDate = new Date();
-    beforeDate.setDate(today.getDate() - 365);
+    beforeDate.setDate(today.getDate() - 720);
     this.state = {
       isLoading: false,
       formData: {
         departure: '',
         destination: '',
-        nbConnections: [1,4],
-        stayDuration: [0, 31],
+        nbConnections: [1,6],
+        stayDuration: [0, 720],
         isTripRound: false,
-        searchDate: [-365, 0],
+        searchDate: [-720, 0],
       },
       data: undefined,
     };
@@ -92,6 +93,11 @@ class ExampleComponent extends React.Component<any, State> {
       },
       body: JSON.stringify({
         ond: `${this.state.formData.departure}${this.state.formData.destination}`,
+        search_country: this.state.formData.searchCountry || null,
+        nb_connections: this.state.formData.nbConnections,
+        stay_duration: this.state.formData.isTripRound ? this.state.formData.stayDuration : null,
+        search_date: this.state.formData.searchDate.map(d => this.intToDate(d)),
+        trip_type: this.state.formData.isTripRound ? 'RT' : 'ST',
       })
     }
     fetch(queryString, init)
@@ -123,10 +129,6 @@ class ExampleComponent extends React.Component<any, State> {
         destination: event.target.value,
       }
     })
-  }
-
-  public handleChangeCountry(event: { target: { value: string }}) {
-
   }
 
   public handleChangeNbConnections(_: any, data: any) {
@@ -165,6 +167,16 @@ class ExampleComponent extends React.Component<any, State> {
       formData: {
         ...this.state.formData,
         searchDate: [data[0], data[1]],
+      }
+    });
+  }
+
+  public handleChangeCountry(e: any) {
+    this.setState({
+      ...this.state,
+      formData: {
+        ...this.state.formData,
+        searchCountry: e,
       }
     });
   }
@@ -217,9 +229,29 @@ class ExampleComponent extends React.Component<any, State> {
             <label>DESTINATION (*): </label><br/>
             <TextField variant="outlined" onChange={this.handleChangeDest} className="text"/>
           </div>
+          <div className="layout">
+            <div className='form-field'>
+              <label>IS TRIP ROUND ? </label>
+              <Checkbox onChange={this.handleChangeIsTripRound}/>
+            </div>
+            <div className='form-field'>
+              <label>STAY DURATION : </label>
+              <Slider
+                getAriaLabel={() => 'Stay Duration'}
+                onChange={this.handleChangeStayDuration}
+                value={[this.state.formData.stayDuration[0], this.state.formData.stayDuration[1]]}
+                valueLabelDisplay="auto"
+                step={1}
+                min={0}
+                max={31}
+                disabled={!this.state.formData.isTripRound}
+                marks={[{value: 0, label: '0'}, {value: 31, label: '31'}]}
+              />
+            </div>
+          </div>
           <div className='form-field'>
             <label>SEARCH COUNTRY : </label><br/>
-            <TextField variant="outlined" onChange={this.handleChangeCountry} className="text"/>
+            { UnstyledSelectRichOptions(this) }
           </div>
           <div className='form-field'>
             <label>NB CONNECTIONS : </label>
@@ -230,8 +262,8 @@ class ExampleComponent extends React.Component<any, State> {
               valueLabelDisplay="auto"
               step={1}
               min={1}
-              max={4}
-              marks={[{value: 1, label: '1'}, {value: 4, label: '4'}]}
+              max={6}
+              marks={[{value: 1, label: '1'}, {value: 6, label: '6'}]}
             />
           </div>
           <div className='form-field'>
@@ -242,39 +274,20 @@ class ExampleComponent extends React.Component<any, State> {
               value={[this.state.formData.searchDate[0], this.state.formData.searchDate[1]]}
               valueLabelDisplay="auto"
               step={1}
-              min={-365}
+              min={-720}
               max={0}
               valueLabelFormat={this.intToDate}
-              marks={[{value: -365, label: this.intToDate(-365)}, {value: 0, label: this.intToDate(0)}]}
+              marks={[{value: -720, label: this.intToDate(-720)}, {value: 0, label: this.intToDate(0)}]}
             />
-          </div>
-          <div className="layout">
-          <div className='form-field'>
-            <label>IS TRIP ROUND ? </label>
-            <Checkbox onChange={this.handleChangeIsTripRound}/>
-          </div>
-          <div className='form-field'>
-            <label>STAY DURATION : </label>
-            <Slider
-              getAriaLabel={() => 'Stay Duration'}
-              onChange={this.handleChangeStayDuration}
-              value={[this.state.formData.stayDuration[0], this.state.formData.stayDuration[1]]}
-              valueLabelDisplay="auto"
-              step={1}
-              min={0}
-              max={31}
-              disabled={!this.state.formData.isTripRound}
-              marks={[{value: 0, label: '0'}, {value: 31, label: '31'}]}
-            />
-          </div>
           </div>
           <div className='form-field'>
             <Button variant="outlined" onClick={this.callApi} disabled={!this.state.formData.departure || !this.state.formData.destination}>FETCH DATA</Button>
+            <Button variant="outlined" onClick={() => console.log(this.state.formData)}>STATE</Button>
           </div>
         </div>
         { (this.state.isLoading || this.state.data) && <div className="dataContainer">
           { this.state.isLoading && <img className="loading" alt="loading" src={require("./spinner.gif")}/> }
-          { this.state.data && <Plot data={ data } layout={ layout } className="data"/>}
+          { this.state.data && !this.state.isLoading && <Plot data={ data } layout={ layout } className="data"/>}
         </div> }
         { !(this.state.isLoading || this.state.data) && <div className="titleContainer">
           <img className="plane" alt="loading" src={require("./title.png")}/>
