@@ -292,6 +292,9 @@ class ExampleComponent extends React.Component<any, State> {
         { !(this.state.isLoading || this.state.data) && <div className="titleContainer">
           <img className="plane" alt="loading" src={require("./title.png")}/>
         </div> }
+        <div className="pchol">
+          <a href="https://github.com/pchol22" target="_blank" rel="noreferrer">@Pchol22</a>
+        </div>
       </div>
     );
   }
