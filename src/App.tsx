@@ -286,7 +286,8 @@ class ExampleComponent extends React.Component<any, State> {
         </div>
         { (this.state.isLoading || this.state.data) && <div className="dataContainer">
           { this.state.isLoading && <img className="loading" alt="loading" src={require("./spinner.gif")}/> }
-          { this.state.data && !this.state.isLoading && <Plot data={ data } layout={ layout } className="data"/>}
+          { this.state.data && !this.state.isLoading && Object.keys(this.state.data?.companies).length !== 0 && <Plot data={ data } layout={ layout } className="data"/>}
+          { !this.state.isLoading && this.state.data?.ond && Object.keys(this.state.data?.companies).length === 0 && <h2>No recommendations data found</h2>}
         </div> }
         { !(this.state.isLoading || this.state.data) && <div className="titleContainer">
           <img className="plane" alt="loading" src={require("./title.png")}/>
